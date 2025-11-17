@@ -4,6 +4,8 @@ class NotifyCard extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this._config = {};
     this._notifyServices = [];
+    this._isInitialized = false;
+    this._messageValue = '';
   }
 
   setConfig(config) {
@@ -17,22 +19,30 @@ class NotifyCard extends HTMLElement {
       send_button_text: config.send_button_text || 'Send',
       ...config
     };
-    this.render();
+    this._isInitialized = false;
   }
 
   set hass(hass) {
+    const oldHass = this._hass;
     this._hass = hass;
-    this._updateNotifyServices();
-    this.render();
+
+    // Only update and render if services changed or first initialization
+    const servicesChanged = this._updateNotifyServices();
+
+    if (!this._isInitialized || servicesChanged) {
+      this.render();
+      this._isInitialized = true;
+    }
   }
 
   _updateNotifyServices() {
-    if (!this._hass) return;
+    if (!this._hass) return false;
 
     // Get all services
     const services = this._hass.services;
 
     // Find all notify services
+    const oldServicesCount = this._notifyServices.length;
     if (services.notify) {
       this._notifyServices = Object.keys(services.notify).map(service => ({
         value: `notify.${service}`,
@@ -44,6 +54,9 @@ class NotifyCard extends HTMLElement {
     if (!this._selectedService && this._notifyServices.length > 0) {
       this._selectedService = this._config.default_service || this._notifyServices[0].value;
     }
+
+    // Return true if services changed
+    return oldServicesCount !== this._notifyServices.length;
   }
 
   _formatServiceName(service) {
@@ -57,6 +70,12 @@ class NotifyCard extends HTMLElement {
 
   render() {
     if (!this.shadowRoot) return;
+
+    // Save current message value before re-render
+    const messageInput = this.shadowRoot.getElementById('message');
+    if (messageInput) {
+      this._messageValue = messageInput.value;
+    }
 
     this.shadowRoot.innerHTML = `
       <style>
@@ -168,7 +187,7 @@ class NotifyCard extends HTMLElement {
 
           <div class="form-group">
             <label for="message">Message:</label>
-            <textarea id="message" placeholder="Enter your notification message..."></textarea>
+            <textarea id="message" placeholder="Enter your notification message...">${this._messageValue}</textarea>
           </div>
 
           <div class="button-container">
@@ -193,22 +212,75 @@ class NotifyCard extends HTMLElement {
     const messageInput = this.shadowRoot.getElementById('message');
 
     if (serviceSelect) {
+      // Prevent HA keyboard shortcuts when selecting
+      serviceSelect.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+      });
+
+      serviceSelect.addEventListener('keyup', (e) => {
+        e.stopPropagation();
+      });
+
+      serviceSelect.addEventListener('keypress', (e) => {
+        e.stopPropagation();
+      });
+
       serviceSelect.addEventListener('change', (e) => {
+        e.stopPropagation();
         this._selectedService = e.target.value;
+      });
+
+      // Prevent dropdown from closing on interaction
+      serviceSelect.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      serviceSelect.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
       });
     }
 
     if (sendButton) {
-      sendButton.addEventListener('click', () => {
+      sendButton.addEventListener('click', (e) => {
+        e.stopPropagation();
         this._sendNotification();
       });
     }
 
     if (messageInput) {
+      // Stop all keyboard event propagation to prevent HA shortcuts
       messageInput.addEventListener('keydown', (e) => {
+        e.stopPropagation();
         if (e.ctrlKey && e.key === 'Enter') {
           this._sendNotification();
         }
+      });
+
+      messageInput.addEventListener('keyup', (e) => {
+        e.stopPropagation();
+      });
+
+      messageInput.addEventListener('keypress', (e) => {
+        e.stopPropagation();
+      });
+
+      // Also prevent click event propagation
+      messageInput.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+
+      messageInput.addEventListener('focus', (e) => {
+        e.stopPropagation();
+      });
+
+      messageInput.addEventListener('blur', (e) => {
+        e.stopPropagation();
+      });
+
+      // Save value on input
+      messageInput.addEventListener('input', (e) => {
+        e.stopPropagation();
+        this._messageValue = e.target.value;
       });
     }
   }
@@ -248,6 +320,7 @@ class NotifyCard extends HTMLElement {
 
       // Clear the message field
       messageInput.value = '';
+      this._messageValue = '';
 
       // Reset button
       setTimeout(() => {
@@ -313,7 +386,7 @@ window.customCards.push({
 });
 
 console.info(
-  '%c NOTIFY-CARD %c Version 1.0.0 ',
+  '%c NOTIFY-CARD %c Version 1.0.1 ',
   'color: white; background: #00aaff; font-weight: bold;',
   'color: #00aaff; background: white; font-weight: bold;'
 );

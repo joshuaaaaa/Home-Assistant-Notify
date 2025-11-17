@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2025-11-17
+
+### Fixed
+- Fixed re-rendering issue that caused text field to lose focus
+- Fixed dropdown menu closing unexpectedly during selection
+- Added event propagation stopping to prevent Home Assistant keyboard shortcuts from interfering
+- Text field now properly retains its value during updates
+- Improved stability when interacting with form elements
+
+### Changed
+- Card only re-renders when services change or during initial load
+- All input events now stop propagation to prevent conflicts with HA shortcuts
+
 ## [1.0.0] - 2025-11-16
 
 ### Added
