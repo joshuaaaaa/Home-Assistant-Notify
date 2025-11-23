@@ -4,6 +4,8 @@
 
 Custom Lovelace card for sending notifications in Home Assistant with an easy-to-use interface.
 
+<img width="515" height="410" alt="image" src="https://github.com/user-attachments/assets/8e1d96c2-16d0-4fb7-968c-243e865f0421" />
+
 ## Features
 
 - 📱 **Select notification service** - Choose from all available notify services (mobile app, Telegram, etc.)
@@ -78,10 +80,19 @@ The card will automatically detect all your notify services:
 - `notify.alexa_media`
 - And any other `notify.*` service in your Home Assistant
 
-## Support
-
-If you encounter any issues, please [open an issue](https://github.com/yourusername/notify-card/issues) on GitHub.
 
 ## License
 
 MIT License - feel free to use and modify as needed.
+
+## Support
+
+If you like this card, please ⭐ star this repository!
+
+Found a bug or have a feature request? Please open an issue.
+
+
+## http://buymeacoffee.com/jakubhruby
+
+
+<img width="150" height="150" alt="qr-code" src="https://github.com/user-attachments/assets/2581bf36-7f7d-4745-b792-d1abaca6e57d" />
